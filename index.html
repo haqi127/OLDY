@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perkuliahan MHI</title>
+    <link rel="icon" href="https://img.icons8.com/?size=100&id=pdp190Sk7cO8&format=png&color=FFFFFF">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-blue: #537B2F;
+            --accent-pink: #8DA750;
+            --soft-blue: #eff1d1;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Poppins', sans-serif;
+            background-color: #f4f7f9;
+            display: flex;
+            justify-content: center;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 450px;
+            min-height: 100vh;
+            background: #ffffff;
+            position: relative;
+            box-shadow: 0 0 20px rgba(0,0,0,0.05);
+        }
+
+        /* Login Screen */
+        #login-screen {
+            display: none;
+            height: 100vh;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: var(--bg-blue);
+            padding: 20px;
+            box-sizing: border-box;
+            position: absolute;
+            width: 100%;
+            z-index: 2000;
+        }
+
+        .login-card {
+            background: white;
+            padding: 25px;
+            border-radius: 20px;
+            text-align: center;
+            width: 85%;
+            max-width: 320px;
+        }
+
+        /* Header UI */
+        .header-section {
+            background: var(--bg-blue);
+            padding: 40px 25px 60px;
+            color: white;
+            border-radius: 0 0 40px 40px;
+            position: relative;
+        }
+
+        .header-top-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+
+        .header-top-row h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+
+        .reload-btn-inline {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .reload-btn-inline:active { transform: scale(0.9); background: rgba(255, 255, 255, 0.4); }
+
+        .back-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            margin-top: 15px;
+            font-size: 12px;
+        }
+
+        /* Pages */
+        .page { display: none; padding-bottom: 100px; animation: fadeIn 0.3s; }
+        .active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* Components */
+        .info-box {
+            background: white;
+            color: #333;
+            padding: 15px;
+            border-radius: 15px;
+            margin-top: 20px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        .countdown-container {
+            margin: 20px 25px;
+            padding: 20px;
+            background: var(--soft-blue);
+            border-radius: 20px;
+            border-left: 5px solid var(--bg-blue);
+        }
+
+        .card-container { padding: 0 25px; margin-top: 35px; }
+        .menu-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+        .icon-box { background: white; aspect-ratio: 1/1; border-radius: 22px; display: flex; justify-content: center; align-items: center; box-shadow: 0 10px 20px rgba(0,0,0,0.08); cursor: pointer; }
+
+        /* List & Table */
+        .list-item {
+            background: white;
+            padding: 15px;
+            border-radius: 15px;
+            margin: 0 20px 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            border-left: 5px solid var(--bg-blue);
+        }
+
+        .btn-link { background: var(--accent-pink); color: white; padding: 6px 12px; border-radius: 8px; text-decoration: none; font-size: 11px; font-weight: bold; }
+
+        .nim-table { width: calc(100% - 40px); margin: 20px; background: white; border-radius: 15px; overflow: hidden; border-collapse: collapse; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        .nim-table th { background: var(--bg-blue); color: white; padding: 12px; text-align: left; font-size: 14px; }
+        .nim-table td { padding: 12px; border-bottom: 1px solid #eee; font-size: 13px; }
+
+        /* Bottom Navbar */
+        .nav-bar {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            max-width: 450px;
+            height: 80px;
+            background: var(--bg-blue);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            border-radius: 25px 25px 0 0;
+            z-index: 1000;
+        }
+
+        .nav-center {
+            width: 70px;
+            height: 70px;
+            background: white;
+            transform: translateY(-20px) rotate(45deg);
+            border: 5px solid var(--bg-blue);
+            border-radius: 18px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <div id="login-screen">
+            <div class="login-card">
+                <h2 style="color:var(--bg-blue)">Halo!</h2>
+                <input type="text" id="nameInput" style="width:100%; padding:12px; border:2px solid #eee; border-radius:10px; box-sizing:border-box;" placeholder="Nama Anda...">
+                <button onclick="saveName()" style="background:var(--accent-pink); color:white; border:none; padding:12px; border-radius:50px; margin-top:20px; cursor:pointer; font-weight:bold; width:100%;">MASUK</button>
+            </div>
+        </div>
+
+        <div id="page-home" class="page">
+            <div class="header-section">
+                <div class="header-top-row">
+                    <h1 id="userGreeting">Halo Hikari</h1>
+                    <button class="reload-btn-inline" onclick="syncDatabase()">
+                        <img src="https://img.icons8.com/?size=100&id=35635&format=png&color=FFFFFF" style="width:24px;">
+                    </button>
+                </div>
+                <p>IAI Al-Hidayah Kelas C MHI Putra</p>
+                <div class="info-box">
+                    <b style="color:var(--accent-pink)">📢 Pengumuman:</b>
+                    <div id="live-announcement">Menghubungkan...</div>
+                </div>
+            </div>
+            <div class="card-container">
+                <div class="menu-grid">
+                    <div onclick="showPage('jadwal')" class="menu-item"><div class="icon-box"><img src="https://img.icons8.com/?size=100&id=116310&format=png&color=537B2F" style="width:40px;"></div><p style="text-align:center; font-size:12px; font-weight:600;">Jadwal</p></div>
+                    <div onclick="showPage('kelompok')" class="menu-item"><div class="icon-box"><img src="https://img.icons8.com/?size=100&id=115604&format=png&color=537B2F" style="width:40px;"></div><p style="text-align:center; font-size:12px; font-weight:600;">Kelompok</p></div>
+                    <div onclick="showPage('nim')" class="menu-item"><div class="icon-box"><img src="https://img.icons8.com/?size=100&id=99194&format=png&color=537B2F" style="width:40px;"></div><p style="text-align:center; font-size:12px; font-weight:600;">NIM</p></div>
+                </div>
+            </div>
+            <div class="countdown-container">
+                <h3 style="color:var(--bg-blue); margin:0; font-size:16px;">Hitung Mundur Perkuliahan</h3>
+                <div id="live-countdown" style="font-weight:700; color:var(--bg-blue); font-size:20px;">-- Hari Lagi</div>
+                <div id="live-date" style="font-size:12px; color:#3e3131">-- Masehi</div>
+            </div>
+        </div>
+
+        <div id="page-jadwal" class="page">
+            <div class="header-section">
+                <div class="header-top-row">
+                    <h1>Jadwal Pelajaran</h1>
+                    <button class="reload-btn-inline" onclick="syncDatabase()"><img src="https://img.icons8.com/?size=100&id=35635&format=png&color=FFFFFF" style="width:24px;"></button>
+                </div>
+                <button class="back-btn" onclick="showPage('home')">← Kembali</button>
+            </div>
+            <div id="list-jadwal" style="margin-top:20px"></div>
+        </div>
+
+        <div id="page-kelompok" class="page">
+            <div class="header-section">
+                <div class="header-top-row">
+                    <h1>Daftar Kelompok Presentasi</h1>
+                    <button class="reload-btn-inline" onclick="syncDatabase()"><img src="https://img.icons8.com/?size=100&id=35635&format=png&color=FFFFFF" style="width:24px;"></button>
+                </div>
+                <button class="back-btn" onclick="showPage('home')">← Kembali</button>
+            </div>
+            <div id="list-kelompok" style="margin-top:20px"></div>
+        </div>
+
+        <div id="page-nim" class="page">
+            <div class="header-section">
+                <div class="header-top-row">
+                    <h1>Data Mahasiswa</h1>
+                    <button class="reload-btn-inline" onclick="syncDatabase()"><img src="https://img.icons8.com/?size=100&id=35635&format=png&color=FFFFFF" style="width:24px;"></button>
+                </div>
+                <button class="back-btn" onclick="showPage('home')">← Kembali</button>
+            </div>
+            <table class="nim-table">
+                <thead><tr><th>NIM</th><th>Nama Lengkap</th></tr></thead>
+                <tbody id="table-nim"></tbody>
+            </table>
+        </div>
+
+        <div id="page-quest" class="page">
+            <div class="header-section">
+                <div class="header-top-row">
+                    <h1>Tugas</h1>
+                    <button class="reload-btn-inline" onclick="syncDatabase()"><img src="https://img.icons8.com/?size=100&id=35635&format=png&color=FFFFFF" style="width:24px;"></button>
+                </div>
+                <button class="back-btn" onclick="showPage('home')">← Kembali</button>
+            </div>
+            <div id="list-quest" style="margin-top:20px"></div>
+        </div>
+
+        <div id="page-event" class="page">
+            <div class="header-section">
+                <div class="header-top-row">
+                    <h1>Event Mahasiswa</h1>
+                    <button class="reload-btn-inline" onclick="syncDatabase()"><img src="https://img.icons8.com/?size=100&id=35635&format=png&color=FFFFFF" style="width:24px;"></button>
+                </div>
+                <button class="back-btn" onclick="showPage('home')">← Kembali</button>
+            </div>
+            <div id="list-event" style="margin-top:20px"></div>
+        </div>
+
+        <div class="nav-bar" id="navbar">
+            <span onclick="showPage('home')" style="cursor:pointer;"><img src="https://img.icons8.com/?size=100&id=106097&format=png&color=FFFFFF" style="width:30px;"></span>
+            <span onclick="showPage('quest')" style="cursor:pointer;"><img src="https://img.icons8.com/?size=100&id=weajTfKaDT0B&format=png&color=FFFFFF" style="width:30px;"></span>
+            <div class="nav-center">
+                <a id="zoom-link" href="#" target="_blank">
+                    <img src="https://img.icons8.com/?size=100&id=zyzNIFhdbPF0&format=png&color=228BE6" style="width:40px; transform:rotate(-45deg);">
+                </a>
+            </div>
+            <span onclick="showPage('event')" style="cursor:pointer;"><img src="https://img.icons8.com/?size=100&id=MSGvBvph6QC7&format=png&color=FFFFFF" style="width:30px;"></span>
+            <span onclick="logout()" style="cursor:pointer;"><img src="https://img.icons8.com/?size=100&id=83179&format=png&color=FFFFFF" style="width:30px;"></span>
+        </div>
+    </div>
+
+    <script>
+
+    document.addEventListener("backbutton", function(e) {
+    // Cek apakah user sedang berada di tampilan menu (bukan dashboard)
+    if (tampilanSekarang !== "home") {
+        e.preventDefault(); // Mencegah aplikasi keluar
+        kembaliKeDashboard(); // Fungsi buatanmu untuk menampilkan dashboard
+    } else {
+        // Jika sudah di dashboard, biarkan fungsi default (keluar aplikasi)
+    }
+    }, false);
+
+        const PERMANENT_DB_URL = "https://api.npoint.io/4010da4ce3ed3931dde8";
+
+        function showPage(id) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            const page = document.getElementById('page-' + id);
+            if(page) page.classList.add('active');
+            window.scrollTo(0,0);
+        }
+
+        async function syncDatabase() {
+            try {
+                document.getElementById('live-announcement').innerText = "Memperbarui data...";
+                const response = await fetch(PERMANENT_DB_URL + '?nocache=' + new Date().getTime());
+                const data = await response.json();
+
+                if(data.zoom_url) document.getElementById('zoom-link').href = data.zoom_url;
+                document.getElementById('live-announcement').innerText = data.pengumuman;
+                document.getElementById('live-countdown').innerText = data.hari_lagi + " Hari Lagi";
+                document.getElementById('live-date').innerText = data.tanggal_mulai;
+
+                if(data.jadwal) {
+                    document.getElementById('list-jadwal').innerHTML = data.jadwal.map(j => `
+                        <div class="list-item">
+                            <div>
+                                <b style="font-size:15px;">${j.matkul}</b><br>
+                                <small style="color:var(--bg-blue); font-weight:600;">${j.jam}</small><br>
+                                <small style="color:#888;">Dosen: ${j.dosen || '-'}</small>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+
+                if(data.tugas) {
+                    document.getElementById('list-quest').innerHTML = data.tugas.map(t => `
+                        <div class="list-item">
+                            <div><b>${t.judul}</b><br><small>${t.deskripsi}</small></div>
+                            ${t.link ? `<a href="${t.link}" class="btn-link" target="_blank">LIHAT</a>` : ''}
+                        </div>
+                    `).join('');
+                }
+
+                if(data.event) {
+                    document.getElementById('list-event').innerHTML = data.event.map(e => `
+                        <div class="list-item">
+                            <div><b>${e.nama}</b><br><small>${e.tanggal}</small></div>
+                            ${e.link ? `<a href="${e.link}" class="btn-link" target="_blank">LIHAT</a>` : ''}
+                        </div>
+                    `).join('');
+                }
+
+                if(data.kelompok) {
+                    document.getElementById('list-kelompok').innerHTML = data.kelompok.map(k => `
+                        <div class="list-item">
+                            <div><b>${k.nama}</b><br><small>${k.tugas}</small></div>
+                            <a href="${k.spreadsheet}" class="btn-link" target="_blank">SPREADSHEET</a>
+                        </div>
+                    `).join('');
+                }
+
+                if(data.nim) {
+                    document.getElementById('table-nim').innerHTML = data.nim.map(n => `<tr><td>${n.id}</td><td>${n.nama}</td></tr>`).join('');
+                }
+
+            } catch (e) {
+                document.getElementById('live-announcement').innerText = "Gagal memuat data.";
+            }
+        }
+
+        function saveName() {
+            const n = document.getElementById('nameInput').value;
+            if(n) { localStorage.setItem('namaUser', n); location.reload(); }
+        }
+
+        function logout() {
+            if(confirm("Keluar dan ganti nama?")) { localStorage.removeItem('namaUser'); location.reload(); }
+        }
+
+        function init() {
+            const user = localStorage.getItem('namaUser');
+            if(user) {
+                document.getElementById('userGreeting').innerText = "Halo " + user;
+                showPage('home');
+                syncDatabase();
+            } else {
+                document.getElementById('login-screen').style.display = 'flex';
+                document.getElementById('navbar').style.display = 'none';
+            }
+        }
+        init();
+    </script>
+</body>
+</html>
