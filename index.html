@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Perkuliahan</title>
+    <title>Perkuliahan MHI</title>
     <link rel="icon" href="https://img.icons8.com/?size=100&id=pdp190Sk7cO8&format=png&color=FFFFFF">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
@@ -54,18 +54,23 @@
             margin: -50px auto 20px;
             height: 180px;
             background: #eee;
-            border-radius: 20px;
             border: 1px solid #eee;
+            border-radius: 20px;
             overflow: hidden;
             position: relative;
             box-shadow: var(--shadow-md);
             z-index: 10;
+            /* Pastikan touch events tidak ter-block */
+            touch-action: pan-y;
         }
 
         .slider-wrapper {
             display: flex;
             height: 100%;
             transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            /* Nonaktifkan select teks saat drag */
+            user-select: none;
+            -webkit-user-select: none;
         }
 
         .slider-wrapper img {
@@ -73,6 +78,9 @@
             height: 100%;
             object-fit: cover;
             flex-shrink: 0;
+            /* Cegah drag image bawaan browser */
+            pointer-events: none;
+            -webkit-user-drag: none;
         }
 
         .slider-dots {
@@ -213,7 +221,7 @@
                 </div>
             </div>
 
-            <div class="slider-container">
+            <div class="slider-container" id="sliderContainer">
                 <div class="slider-wrapper" id="imageSlider"></div>
                 <div class="slider-dots" id="sliderDots"></div>
             </div>
@@ -270,8 +278,94 @@
     <script>
     const PERMANENT_DB_URL = "https://api.npoint.io/4010da4ce3ed3931dde8";
     let slideIndex = 0;
+    let totalSlides = 0;
     let slideInterval;
-    let autoRefreshInterval; // Variabel untuk menyimpan interval refresh data
+    let autoRefreshInterval;
+
+    // =============================================
+    // SWIPE / DRAG SUPPORT UNTUK SLIDER
+    // =============================================
+    let touchStartX = 0;
+    let touchEndX = 0;
+    let isDragging = false;
+    let dragStartX = 0;
+    const SWIPE_THRESHOLD = 50; // minimum px untuk dianggap swipe
+
+    function goToSlide(index) {
+        if (totalSlides === 0) return;
+        // Loop: jika lewat ujung, balik ke sisi lain
+        slideIndex = (index + totalSlides) % totalSlides;
+        const wrapper = document.getElementById('imageSlider');
+        const dots = document.querySelectorAll('.dot');
+        if (wrapper) wrapper.style.transform = `translateX(-${slideIndex * 100}%)`;
+        dots.forEach((dot, i) => dot.classList.toggle('active', i === slideIndex));
+    }
+
+    function initSliderSwipe() {
+        const container = document.getElementById('sliderContainer');
+        if (!container) return;
+
+        // --- TOUCH EVENTS (mobile) ---
+        container.addEventListener('touchstart', (e) => {
+            touchStartX = e.changedTouches[0].clientX;
+            // Pause auto-slide saat user menyentuh
+            clearInterval(slideInterval);
+        }, { passive: true });
+
+        container.addEventListener('touchend', (e) => {
+            touchEndX = e.changedTouches[0].clientX;
+            const diff = touchStartX - touchEndX;
+
+            if (Math.abs(diff) >= SWIPE_THRESHOLD) {
+                if (diff > 0) {
+                    goToSlide(slideIndex + 1); // Geser kiri → gambar berikutnya
+                } else {
+                    goToSlide(slideIndex - 1); // Geser kanan → gambar sebelumnya
+                }
+            }
+            // Resume auto-slide setelah swipe
+            startAutoSlide(totalSlides);
+        }, { passive: true });
+
+        // --- MOUSE DRAG EVENTS (desktop) ---
+        container.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            dragStartX = e.clientX;
+            clearInterval(slideInterval);
+            // Nonaktifkan transisi saat drag agar terasa responsif
+            const wrapper = document.getElementById('imageSlider');
+            if (wrapper) wrapper.style.transition = 'none';
+        });
+
+        container.addEventListener('mouseup', (e) => {
+            if (!isDragging) return;
+            isDragging = false;
+            const diff = dragStartX - e.clientX;
+            const wrapper = document.getElementById('imageSlider');
+            // Kembalikan transisi
+            if (wrapper) wrapper.style.transition = 'transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
+
+            if (Math.abs(diff) >= SWIPE_THRESHOLD) {
+                if (diff > 0) {
+                    goToSlide(slideIndex + 1);
+                } else {
+                    goToSlide(slideIndex - 1);
+                }
+            }
+            startAutoSlide(totalSlides);
+        });
+
+        // Batalkan drag jika mouse keluar dari container
+        container.addEventListener('mouseleave', () => {
+            if (!isDragging) return;
+            isDragging = false;
+            const wrapper = document.getElementById('imageSlider');
+            if (wrapper) wrapper.style.transition = 'transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
+            startAutoSlide(totalSlides);
+        });
+    }
+
+    // =============================================
 
     function showPage(id) {
         document.querySelectorAll('.page').forEach(p => p.style.display = 'none');
@@ -282,7 +376,6 @@
 
     async function syncDatabase() {
         try {
-            // Kita hapus teks "Memperbarui data..." agar tidak mengganggu user setiap 5 detik
             const response = await fetch(PERMANENT_DB_URL + '?nocache=' + new Date().getTime());
             if (!response.ok) throw new Error("Network response was not ok");
             const data = await response.json();
@@ -294,8 +387,10 @@
                 slider.innerHTML = data.slider.map(img => `<img src="${img}">`).join('');
                 dots.innerHTML = data.slider.map((_, i) => `<div class="dot ${i===0?'active':''}"></div>`).join('');
                 
+                totalSlides = data.slider.length;
+                slideIndex = 0;
                 clearInterval(slideInterval);
-                startAutoSlide(data.slider.length);
+                startAutoSlide(totalSlides);
             }
 
             // 2. Data Utama
@@ -304,7 +399,7 @@
             document.getElementById('live-countdown').innerText = data.hari_lagi + " Hari Lagi";
             document.getElementById('live-date').innerText = data.tanggal_mulai;
 
-            // 3. Mapping Lists (Update konten secara halus)
+            // 3. Mapping Lists
             if(data.jadwal) document.getElementById('list-jadwal').innerHTML = data.jadwal.map(j => `<div class="list-item"><div><b style="color:var(--bg-blue)">${j.matkul}</b><br><small>🕒 ${j.jam}</small><br><small>👤 ${j.dosen || '-'}</small></div></div>`).join('');
             if(data.tugas) document.getElementById('list-quest').innerHTML = data.tugas.map(t => `<div class="list-item"><div><b>${t.judul}</b><br><small>${t.deskripsi}</small></div>${t.link ? `<a href="${t.link}" class="btn-link" target="_blank">LIHAT</a>` : ''}</div>`).join('');
             if(data.event) document.getElementById('list-event').innerHTML = data.event.map(e => `<div class="list-item"><div><b>${e.nama}</b><br><small>${e.tanggal}</small></div>${e.link ? `<a href="${e.link}" class="btn-link" target="_blank">LIHAT</a>` : ''}</div>`).join('');
@@ -315,21 +410,18 @@
 
         } catch (e) {
             console.error("Sync error:", e);
-            // Hanya tampilkan pesan error jika data benar-benar kosong
             if(document.getElementById('live-announcement').innerText === "Menghubungkan...") {
-                document.getElementById('live-announcement').innerText = "Gagal memuat data.";
+                document.getElementById('live-announcement').innerText = "Klik Refresh di pojok kanan atas, atau periksa koneksi internetmu.";
             }
         }
     }
 
-    function startAutoSlide(totalSlides) {
-        slideIndex = 0;
+    function startAutoSlide(count) {
+        totalSlides = count;
+        clearInterval(slideInterval);
+        if (count <= 1) return; // Tidak perlu auto-slide kalau cuma 1 gambar
         slideInterval = setInterval(() => {
-            slideIndex = (slideIndex + 1) % totalSlides;
-            const wrapper = document.getElementById('imageSlider');
-            const dots = document.querySelectorAll('.dot');
-            if(wrapper) wrapper.style.transform = `translateX(-${slideIndex * 100}%)`;
-            dots.forEach((dot, i) => dot.classList.toggle('active', i === slideIndex));
+            goToSlide(slideIndex + 1);
         }, 5000);
     }
 
@@ -337,14 +429,14 @@
         const n = document.getElementById('nameInput').value;
         if(n) { 
             localStorage.setItem('namaUser', n); 
-            init(); // Panggil init daripada reload total
+            init();
         }
     }
 
     function logout() {
         if(confirm("Keluar dan ganti nama?")) { 
             localStorage.removeItem('namaUser'); 
-            clearInterval(autoRefreshInterval); // Stop refresh saat logout
+            clearInterval(autoRefreshInterval);
             location.reload(); 
         }
     }
@@ -357,11 +449,11 @@
             document.getElementById('userGreeting').innerText = "Halo " + user;
             showPage('home');
             
-            // Ambil data pertama kali
+            // Inisialisasi swipe listener (cukup sekali)
+            initSliderSwipe();
+
             syncDatabase();
 
-            // Set interval untuk refresh data setiap 5 detik (5000 ms)
-            // Ini yang membuat data selalu "fresh" tanpa reload halaman
             clearInterval(autoRefreshInterval); 
             autoRefreshInterval = setInterval(syncDatabase, 5000);
             
