@@ -5,18 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Perkuliahan MHI</title>
     <link rel="icon" href="https://img.icons8.com/?size=100&id=pdp190Sk7cO8&format=png&color=FFFFFF">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-blue: #537B2F;
+            --bg-blue: #2d4f1e; 
             --accent-pink: #8DA750;
-            --soft-blue: #eff1d1;
+            --soft-blue: #f1f5e9;
+            --white: #ffffff;
+            --shadow-sm: 0 4px 12px rgba(0,0,0,0.05);
+            --shadow-md: 0 10px 25px rgba(0,0,0,0.08);
         }
 
         body {
             margin: 0;
             font-family: 'Poppins', sans-serif;
-            background-color: #f4f7f9;
+            background-color: #f0f2f5;
             display: flex;
             justify-content: center;
         }
@@ -27,281 +30,245 @@
             min-height: 100vh;
             background: #ffffff;
             position: relative;
-            box-shadow: 0 0 20px rgba(0,0,0,0.05);
+            box-shadow: 0 0 40px rgba(0,0,0,0.1);
         }
 
-        /* Login Screen */
-        #login-screen {
-            display: none;
-            height: 100vh;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            background: var(--bg-blue);
-            padding: 20px;
-            box-sizing: border-box;
-            position: absolute;
-            width: 100%;
-            z-index: 2000;
-        }
-
-        .login-card {
-            background: white;
-            padding: 25px;
-            border-radius: 20px;
-            text-align: center;
-            width: 85%;
-            max-width: 320px;
-        }
-
-        /* Header UI */
+        /* --- UI --- */
         .header-section {
-            background: var(--bg-blue);
-            padding: 40px 25px 60px;
+            background: linear-gradient(135deg, var(--bg-blue), #4a6d2a);
+            padding: 40px 25px 80px;
             color: white;
-            border-radius: 0 0 40px 40px;
+            border-radius: 0 0 35px 35px;
             position: relative;
         }
 
-        .header-top-row {
+        .header-top-row h1 { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; margin: 0; }
+
+        /* --- SLIDER --- */
+        .slider-container {
+            width: calc(100% - 50px);
+            margin: -50px auto 20px;
+            height: 180px;
+            background: #eee;
+            border-radius: 20px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: var(--shadow-md);
+            z-index: 10;
+        }
+
+        .slider-wrapper {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 5px;
+            height: 100%;
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        .header-top-row h1 {
-            margin: 0;
-            font-size: 24px;
+        .slider-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            flex-shrink: 0;
         }
 
-        .reload-btn-inline {
-            background: rgba(255, 255, 255, 0.2);
-            border: none;
-            width: 42px;
-            height: 42px;
-            border-radius: 12px;
+        .slider-dots {
+            position: absolute;
+            bottom: 10px;
+            width: 100%;
             display: flex;
             justify-content: center;
-            align-items: center;
-            cursor: pointer;
-            transition: 0.2s;
+            gap: 5px;
         }
 
-        .reload-btn-inline:active { transform: scale(0.9); background: rgba(255, 255, 255, 0.4); }
+        .dot { width: 8px; height: 8px; background: rgba(255,255,255,0.5); border-radius: 50%; transition: 0.3s; }
+        .dot.active { width: 20px; border-radius: 10px; background: white; }
 
-        .back-btn {
-            background: rgba(255,255,255,0.2);
-            border: none;
-            color: white;
-            padding: 8px 15px;
-            border-radius: 10px;
-            cursor: pointer;
-            margin-top: 15px;
-            font-size: 12px;
-        }
-
-        /* Pages */
-        .page { display: none; padding-bottom: 100px; animation: fadeIn 0.3s; }
-        .active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-        /* Components */
+        /* --- BOARD & CARDS --- */
         .info-box {
-            background: white;
-            color: #333;
-            padding: 15px;
-            border-radius: 15px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 18px;
+            border-radius: 20px;
             margin-top: 20px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         }
 
         .countdown-container {
-            margin: 20px 25px;
-            padding: 20px;
+            margin: 25px;
+            padding: 22px;
             background: var(--soft-blue);
-            border-radius: 20px;
-            border-left: 5px solid var(--bg-blue);
+            border-radius: 24px;
+            border-bottom: 4px solid var(--accent-pink);
+            box-shadow: var(--shadow-sm);
         }
 
-        .card-container { padding: 0 25px; margin-top: 35px; }
-        .menu-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
-        .icon-box { background: white; aspect-ratio: 1/1; border-radius: 22px; display: flex; justify-content: center; align-items: center; box-shadow: 0 10px 20px rgba(0,0,0,0.08); cursor: pointer; }
+        .menu-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; padding: 0 25px; }
+        
+        .icon-box { 
+            background: white; 
+            aspect-ratio: 1/1; 
+            border-radius: 24px; 
+            display: flex; 
+            flex-direction: column;
+            justify-content: center; 
+            align-items: center; 
+            box-shadow: var(--shadow-sm); 
+            cursor: pointer;
+            transition: 0.3s;
+            border: 1px solid #f0f0f0;
+        }
 
-        /* List & Table */
+        .icon-box:active { transform: scale(0.92); background: #fafafa; }
+
         .list-item {
             background: white;
-            padding: 15px;
-            border-radius: 15px;
-            margin: 0 20px 12px;
+            padding: 18px;
+            border-radius: 20px;
+            margin: 0 20px 15px;
+            border: 1px solid #f0f0f0;
+            box-shadow: var(--shadow-sm);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-            border-left: 5px solid var(--bg-blue);
         }
 
-        .btn-link { background: var(--accent-pink); color: white; padding: 6px 12px; border-radius: 8px; text-decoration: none; font-size: 11px; font-weight: bold; }
+        .btn-link {
+            background: var(--accent-pink);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-size: 11px;
+            font-weight: bold;
+        }
 
-        .nim-table { width: calc(100% - 40px); margin: 20px; background: white; border-radius: 15px; overflow: hidden; border-collapse: collapse; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        .nim-table { width: calc(100% - 40px); margin: 20px; background: white; border-radius: 15px; overflow: hidden; border-collapse: collapse; box-shadow: var(--shadow-sm); }
         .nim-table th { background: var(--bg-blue); color: white; padding: 12px; text-align: left; font-size: 14px; }
         .nim-table td { padding: 12px; border-bottom: 1px solid #eee; font-size: 13px; }
 
-        /* Bottom Navbar */
+        /* --- BOTTOM NAVBAR --- */
         .nav-bar {
             position: fixed;
             bottom: 0;
             width: 100%;
             max-width: 450px;
-            height: 80px;
+            height: 75px;
             background: var(--bg-blue);
             display: flex;
             justify-content: space-around;
             align-items: center;
-            border-radius: 25px 25px 0 0;
-            z-index: 1000;
+            border-radius: 30px 30px 0 0;
+            box-shadow: 0 -5px 20px rgba(0,0,0,0.1);
         }
 
         .nav-center {
-            width: 70px;
-            height: 70px;
-            background: white;
-            transform: translateY(-20px) rotate(45deg);
-            border: 5px solid var(--bg-blue);
-            border-radius: 18px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            width: 65px; height: 65px;
+            background: var(--white);
+            transform: translateY(-25px);
+            border-radius: 50%;
+            border: 6px solid #f0f2f5;
+            display: flex; justify-content: center; align-items: center;
+            box-shadow: var(--shadow-md);
+        }
+
+        .page { animation: fadeIn 0.3s; padding-bottom: 100px; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        #login-screen {
+            background: linear-gradient(135deg, var(--bg-blue), #1e3615);
+            height: 100vh; flex-direction: column; justify-content: center; align-items: center; position: absolute; width: 100%; z-index: 2000; padding: 20px; box-sizing: border-box;
         }
     </style>
 </head>
 <body>
     <div class="app-container">
-        <div id="login-screen">
-            <div class="login-card">
-                <h2 style="color:var(--bg-blue)">Halo!</h2>
-                <input type="text" id="nameInput" style="width:100%; padding:12px; border:2px solid #eee; border-radius:10px; box-sizing:border-box;" placeholder="Nama Anda...">
-                <button onclick="saveName()" style="background:var(--accent-pink); color:white; border:none; padding:12px; border-radius:50px; margin-top:20px; cursor:pointer; font-weight:bold; width:100%;">MASUK</button>
+        <div id="login-screen" style="display: none;">
+            <div class="login-card" style="background: white; padding: 35px 25px; border-radius: 30px; text-align: center; width: 85%; max-width: 320px; box-shadow: var(--shadow-md);">
+                <img src="https://img.icons8.com/?size=100&id=pdp190Sk7cO8&format=png&color=537B2F" style="width: 60px; margin-bottom: 15px;">
+                <h2 style="color:var(--bg-blue); margin-bottom: 5px;">Selamat Datang</h2>
+                <input type="text" id="nameInput" style="width:100%; padding:14px; border-radius:15px; border:2px solid #eee; box-sizing:border-box;" placeholder="Ketik nama kamu...">
+                <button onclick="saveName()" style="background:var(--bg-blue); color:white; border:none; padding:14px; border-radius:15px; margin-top:20px; cursor:pointer; font-weight:bold; width:100%;">MASUK</button>
             </div>
         </div>
 
-        <div id="page-home" class="page">
+        <div id="page-home" class="page" style="display:none;">
             <div class="header-section">
-                <div class="header-top-row">
-                    <h1 id="userGreeting">Halo Hikari</h1>
-                    <button class="reload-btn-inline" onclick="syncDatabase()">
-                        <img src="https://img.icons8.com/?size=100&id=35635&format=png&color=FFFFFF" style="width:24px;">
+                <div class="header-top-row" style="display: flex; justify-content: space-between; align-items: center;">
+                    <h1 id="userGreeting">Halo Mahasiswa</h1>
+                    <button class="reload-btn-inline" onclick="syncDatabase()" style="background: rgba(255,255,255,0.2); border: none; padding: 10px; border-radius: 12px; cursor: pointer;">
+                        <img src="https://img.icons8.com/?size=100&id=35635&format=png&color=FFFFFF" style="width:22px;">
                     </button>
                 </div>
-                <p>IAI Al-Hidayah Kelas C MHI Putra</p>
                 <div class="info-box">
-                    <b style="color:var(--accent-pink)">📢 Pengumuman:</b>
-                    <div id="live-announcement">Menghubungkan...</div>
+                    <b style="color:var(--soft-blue); font-size: 14px;">📢 PENGUMUMAN</b>
+                    <hr style="opacity: 0.2;">
+                    <div id="live-announcement" style="font-size: 13px; margin-top: 5px; line-height: 1.5;">Menghubungkan...</div>
                 </div>
             </div>
-            <div class="card-container">
-                <div class="menu-grid">
-                    <div onclick="showPage('jadwal')" class="menu-item"><div class="icon-box"><img src="https://img.icons8.com/?size=100&id=116310&format=png&color=537B2F" style="width:40px;"></div><p style="text-align:center; font-size:12px; font-weight:600;">Jadwal</p></div>
-                    <div onclick="showPage('presentasi')" class="menu-item"><div class="icon-box"><img src="https://img.icons8.com/?size=100&id=115604&format=png&color=537B2F" style="width:40px;"></div><p style="text-align:center; font-size:12px; font-weight:600;">Kelompok</p></div>
-                    <div onclick="showPage('SIAKAD')" class="menu-item"><div class="icon-box"><img src="https://img.icons8.com/?size=100&id=99194&format=png&color=537B2F" style="width:40px;"></div><p style="text-align:center; font-size:12px; font-weight:600;">NIM</p></div>
-                </div>
+
+            <div class="slider-container">
+                <div class="slider-wrapper" id="imageSlider"></div>
+                <div class="slider-dots" id="sliderDots"></div>
             </div>
+
+            <div class="menu-grid">
+                <div onclick="showPage('jadwal')" class="icon-box"><img src="https://img.icons8.com/?size=100&id=116310&format=png&color=537B2F" style="width:35px;"><p style="font-size:11px; font-weight:600; margin: 8px 0 0;">Jadwal</p></div>
+                <div onclick="showPage('kelompok')" class="icon-box"><img src="https://img.icons8.com/?size=100&id=115604&format=png&color=537B2F" style="width:35px;"><p style="font-size:11px; font-weight:600; margin: 8px 0 0;">Kelompok</p></div>
+                <div onclick="showPage('nim')" class="icon-box"><img src="https://img.icons8.com/?size=100&id=99194&format=png&color=537B2F" style="width:35px;"><p style="font-size:11px; font-weight:600; margin: 8px 0 0;">NIM</p></div>
+            </div>
+
             <div class="countdown-container">
-                <h3 style="color:var(--bg-blue); margin:0; font-size:16px;">Hitung Mundur Perkuliahan</h3>
-                <div id="live-countdown" style="font-weight:700; color:var(--bg-blue); font-size:20px;">-- Hari Lagi</div>
-                <div id="live-date" style="font-size:12px; color:#3e3131">-- Masehi</div>
+                <h3 style="color:var(--bg-blue); margin:0; font-size:14px; opacity: 0.8;">Hitung Mundur Perkuliahan</h3>
+                <div id="live-countdown" style="font-weight:700; color:var(--bg-blue); font-size:22px; margin: 5px 0;">-- Hari Lagi</div>
+                <div id="live-date" style="font-size:12px; color:#666;">-- Masehi</div>
             </div>
         </div>
 
-        <div id="page-jadwal" class="page">
-            <div class="header-section">
-                <div class="header-top-row">
-                    <h1>Jadwal Pelajaran</h1>
-                    <button class="reload-btn-inline" onclick="syncDatabase()"><img src="https://img.icons8.com/?size=100&id=35635&format=png&color=FFFFFF" style="width:24px;"></button>
-                </div>
-                <button class="back-btn" onclick="showPage('home')">← Kembali</button>
-            </div>
-            <div id="list-jadwal" style="margin-top:20px"></div>
+        <div id="page-jadwal" class="page" style="display:none;">
+            <div class="header-section" style="padding-bottom: 30px;"><h1>Jadwal</h1><button class="btn-link" style="background:rgba(255,255,255,0.2)" onclick="showPage('home')">← Kembali</button></div>
+            <div id="list-jadwal" style="margin-top:20px;"></div>
         </div>
 
-        <div id="page-kelompok" class="page">
-            <div class="header-section">
-                <div class="header-top-row">
-                    <h1>Daftar Kelompok Presentasi</h1>
-                    <button class="reload-btn-inline" onclick="syncDatabase()"><img src="https://img.icons8.com/?size=100&id=35635&format=png&color=FFFFFF" style="width:24px;"></button>
-                </div>
-                <button class="back-btn" onclick="showPage('home')">← Kembali</button>
-            </div>
-            <div id="list-kelompok" style="margin-top:20px"></div>
+        <div id="page-kelompok" class="page" style="display:none;">
+            <div class="header-section" style="padding-bottom: 30px;"><h1>Kelompok</h1><button class="btn-link" style="background:rgba(255,255,255,0.2)" onclick="showPage('home')">← Kembali</button></div>
+            <div id="list-kelompok" style="margin-top:20px;"></div>
         </div>
 
-        <div id="page-nim" class="page">
-            <div class="header-section">
-                <div class="header-top-row">
-                    <h1>Data Mahasiswa</h1>
-                    <button class="reload-btn-inline" onclick="syncDatabase()"><img src="https://img.icons8.com/?size=100&id=35635&format=png&color=FFFFFF" style="width:24px;"></button>
-                </div>
-                <button class="back-btn" onclick="showPage('home')">← Kembali</button>
-            </div>
-            <table class="nim-table">
-                <thead><tr><th>NIM</th><th>Nama Lengkap</th></tr></thead>
-                <tbody id="table-nim"></tbody>
-            </table>
+        <div id="page-nim" class="page" style="display:none;">
+            <div class="header-section" style="padding-bottom: 30px;"><h1>Data NIM</h1><button class="btn-link" style="background:rgba(255,255,255,0.2)" onclick="showPage('home')">← Kembali</button></div>
+            <table class="nim-table"><thead><tr><th>NIM</th><th>Nama</th></tr></thead><tbody id="table-nim"></tbody></table>
         </div>
 
-        <div id="page-quest" class="page">
-            <div class="header-section">
-                <div class="header-top-row">
-                    <h1>Tugas</h1>
-                    <button class="reload-btn-inline" onclick="syncDatabase()"><img src="https://img.icons8.com/?size=100&id=35635&format=png&color=FFFFFF" style="width:24px;"></button>
-                </div>
-                <button class="back-btn" onclick="showPage('home')">← Kembali</button>
-            </div>
-            <div id="list-quest" style="margin-top:20px"></div>
+        <div id="page-quest" class="page" style="display:none;">
+            <div class="header-section" style="padding-bottom: 30px;"><h1>Tugas</h1><button class="btn-link" style="background:rgba(255,255,255,0.2)" onclick="showPage('home')">← Kembali</button></div>
+            <div id="list-quest" style="margin-top:20px;"></div>
         </div>
 
-        <div id="page-event" class="page">
-            <div class="header-section">
-                <div class="header-top-row">
-                    <h1>Event Mahasiswa</h1>
-                    <button class="reload-btn-inline" onclick="syncDatabase()"><img src="https://img.icons8.com/?size=100&id=35635&format=png&color=FFFFFF" style="width:24px;"></button>
-                </div>
-                <button class="back-btn" onclick="showPage('home')">← Kembali</button>
-            </div>
-            <div id="list-event" style="margin-top:20px"></div>
+        <div id="page-event" class="page" style="display:none;">
+            <div class="header-section" style="padding-bottom: 30px;"><h1>Event</h1><button class="btn-link" style="background:rgba(255,255,255,0.2)" onclick="showPage('home')">← Kembali</button></div>
+            <div id="list-event" style="margin-top:20px;"></div>
         </div>
 
         <div class="nav-bar" id="navbar">
-            <span onclick="showPage('home')" style="cursor:pointer;"><img src="https://img.icons8.com/?size=100&id=106097&format=png&color=FFFFFF" style="width:30px;"></span>
-            <span onclick="showPage('quest')" style="cursor:pointer;"><img src="https://img.icons8.com/?size=100&id=weajTfKaDT0B&format=png&color=FFFFFF" style="width:30px;"></span>
+            <span onclick="showPage('home')" style="cursor:pointer;"><img src="https://img.icons8.com/?size=100&id=106097&format=png&color=FFFFFF" style="width:26px;"></span>
+            <span onclick="showPage('quest')" style="cursor:pointer;"><img src="https://img.icons8.com/?size=100&id=weajTfKaDT0B&format=png&color=FFFFFF" style="width:26px;"></span>
             <div class="nav-center">
-                <a id="zoom-link" href="#" target="_blank">
-                    <img src="https://img.icons8.com/?size=100&id=zyzNIFhdbPF0&format=png&color=228BE6" style="width:40px; transform:rotate(-45deg);">
-                </a>
+                <a id="zoom-link" href="#" target="_blank"><img src="https://img.icons8.com/?size=100&id=zyzNIFhdbPF0&format=png&color=228BE6" style="width:35px;"></a>
             </div>
-            <span onclick="showPage('event')" style="cursor:pointer;"><img src="https://img.icons8.com/?size=100&id=MSGvBvph6QC7&format=png&color=FFFFFF" style="width:30px;"></span>
-            <span onclick="logout()" style="cursor:pointer;"><img src="https://img.icons8.com/?size=100&id=83179&format=png&color=FFFFFF" style="width:30px;"></span>
+            <span onclick="showPage('event')" style="cursor:pointer;"><img src="https://img.icons8.com/?size=100&id=MSGvBvph6QC7&format=png&color=FFFFFF" style="width:26px;"></span>
+            <span onclick="logout()" style="cursor:pointer;"><img src="https://img.icons8.com/?size=100&id=83179&format=png&color=FFFFFF" style="width:26px;"></span>
         </div>
     </div>
 
     <script>
-
-    document.addEventListener("backbutton", function(e) {
-    // Cek apakah user sedang berada di tampilan menu (bukan dashboard)
-    if (tampilanSekarang !== "home") {
-        e.preventDefault(); // Mencegah aplikasi keluar
-        kembaliKeDashboard(); // Fungsi buatanmu untuk menampilkan dashboard
-    } else {
-        // Jika sudah di dashboard, biarkan fungsi default (keluar aplikasi)
-    }
-    }, false);
-
         const PERMANENT_DB_URL = "https://api.npoint.io/4010da4ce3ed3931dde8";
+        let slideIndex = 0;
+        let slideInterval;
 
         function showPage(id) {
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            const page = document.getElementById('page-' + id);
-            if(page) page.classList.add('active');
+            document.querySelectorAll('.page').forEach(p => p.style.display = 'none');
+            const target = document.getElementById('page-' + id);
+            if(target) target.style.display = 'block';
             window.scrollTo(0,0);
         }
 
@@ -311,57 +278,45 @@
                 const response = await fetch(PERMANENT_DB_URL + '?nocache=' + new Date().getTime());
                 const data = await response.json();
 
+                // 1. Slider
+                if(data.slider) {
+                    const slider = document.getElementById('imageSlider');
+                    const dots = document.getElementById('sliderDots');
+                    slider.innerHTML = data.slider.map(img => `<img src="${img}">`).join('');
+                    dots.innerHTML = data.slider.map((_, i) => `<div class="dot ${i===0?'active':''}"></div>`).join('');
+                    
+                    // Reset interval agar tidak numpuk
+                    clearInterval(slideInterval);
+                    startAutoSlide(data.slider.length);
+                }
+
+                // 2. Data Utama
                 if(data.zoom_url) document.getElementById('zoom-link').href = data.zoom_url;
                 document.getElementById('live-announcement').innerText = data.pengumuman;
                 document.getElementById('live-countdown').innerText = data.hari_lagi + " Hari Lagi";
                 document.getElementById('live-date').innerText = data.tanggal_mulai;
 
-                if(data.jadwal) {
-                    document.getElementById('list-jadwal').innerHTML = data.jadwal.map(j => `
-                        <div class="list-item">
-                            <div>
-                                <b style="font-size:15px;">${j.matkul}</b><br>
-                                <small style="color:var(--bg-blue); font-weight:600;">${j.jam}</small><br>
-                                <small style="color:#888;">Dosen: ${j.dosen || '-'}</small>
-                            </div>
-                        </div>
-                    `).join('');
-                }
-
-                if(data.tugas) {
-                    document.getElementById('list-quest').innerHTML = data.tugas.map(t => `
-                        <div class="list-item">
-                            <div><b>${t.judul}</b><br><small>${t.deskripsi}</small></div>
-                            ${t.link ? `<a href="${t.link}" class="btn-link" target="_blank">LIHAT</a>` : ''}
-                        </div>
-                    `).join('');
-                }
-
-                if(data.event) {
-                    document.getElementById('list-event').innerHTML = data.event.map(e => `
-                        <div class="list-item">
-                            <div><b>${e.nama}</b><br><small>${e.tanggal}</small></div>
-                            ${e.link ? `<a href="${e.link}" class="btn-link" target="_blank">LIHAT</a>` : ''}
-                        </div>
-                    `).join('');
-                }
-
-                if(data.kelompok) {
-                    document.getElementById('list-kelompok').innerHTML = data.kelompok.map(k => `
-                        <div class="list-item">
-                            <div><b>${k.nama}</b><br><small>${k.tugas}</small></div>
-                            <a href="${k.spreadsheet}" class="btn-link" target="_blank">SPREADSHEET</a>
-                        </div>
-                    `).join('');
-                }
-
-                if(data.nim) {
-                    document.getElementById('table-nim').innerHTML = data.nim.map(n => `<tr><td>${n.id}</td><td>${n.nama}</td></tr>`).join('');
-                }
+                // 3. Mapping Lists
+                if(data.jadwal) document.getElementById('list-jadwal').innerHTML = data.jadwal.map(j => `<div class="list-item"><div><b style="color:var(--bg-blue)">${j.matkul}</b><br><small>🕒 ${j.jam}</small><br><small>👤 ${j.dosen || '-'}</small></div></div>`).join('');
+                if(data.tugas) document.getElementById('list-quest').innerHTML = data.tugas.map(t => `<div class="list-item"><div><b>${t.judul}</b><br><small>${t.deskripsi}</small></div>${t.link ? `<a href="${t.link}" class="btn-link" target="_blank">LIHAT</a>` : ''}</div>`).join('');
+                if(data.event) document.getElementById('list-event').innerHTML = data.event.map(e => `<div class="list-item"><div><b>${e.nama}</b><br><small>${e.tanggal}</small></div>${e.link ? `<a href="${e.link}" class="btn-link" target="_blank">LIHAT</a>` : ''}</div>`).join('');
+                if(data.kelompok) document.getElementById('list-kelompok').innerHTML = data.kelompok.map(k => `<div class="list-item"><div><b>${k.nama}</b><br><small>${k.tugas}</small></div><a href="${k.spreadsheet}" class="btn-link" target="_blank">DETAIL</a></div>`).join('');
+                if(data.nim) document.getElementById('table-nim').innerHTML = data.nim.map(n => `<tr><td>${n.id}</td><td>${n.nama}</td></tr>`).join('');
 
             } catch (e) {
                 document.getElementById('live-announcement').innerText = "Gagal memuat data.";
             }
+        }
+
+        function startAutoSlide(totalSlides) {
+            slideIndex = 0;
+            slideInterval = setInterval(() => {
+                slideIndex = (slideIndex + 1) % totalSlides;
+                const wrapper = document.getElementById('imageSlider');
+                const dots = document.querySelectorAll('.dot');
+                if(wrapper) wrapper.style.transform = `translateX(-${slideIndex * 100}%)`;
+                dots.forEach((dot, i) => dot.classList.toggle('active', i === slideIndex));
+            }, 5000);
         }
 
         function saveName() {
