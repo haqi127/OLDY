@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Perkuliahan MHI</title>
+    <title>Perkuliahan</title>
     <link rel="icon" href="https://img.icons8.com/?size=100&id=pdp190Sk7cO8&format=png&color=FFFFFF">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
@@ -40,6 +40,10 @@
             color: white;
             border-radius: 0 0 35px 35px;
             position: relative;
+        }
+
+        .header-top-row {
+            padding-bottom: 0px;
         }
 
         .header-top-row h1 { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; margin: 0; }
@@ -194,11 +198,12 @@
         <div id="page-home" class="page" style="display:none;">
             <div class="header-section">
                 <div class="header-top-row" style="display: flex; justify-content: space-between; align-items: center;">
-                    <h1 id="userGreeting">Halo Mahasiswa</h1>
+                    <h1 id="userGreeting">Halo Mahasiswa</h1><br>
                     <button class="reload-btn-inline" onclick="syncDatabase()" style="background: rgba(255,255,255,0.2); border: none; padding: 10px; border-radius: 12px; cursor: pointer;">
                         <img src="https://img.icons8.com/?size=100&id=35635&format=png&color=FFFFFF" style="width:22px;">
                     </button>
                 </div>
+
                 <div class="info-box">
                     <b style="color:var(--soft-blue); font-size: 14px;">📢 PENGUMUMAN</b>
                     <hr style="opacity: 0.2;">
@@ -261,85 +266,111 @@
     </div>
 
     <script>
-        const PERMANENT_DB_URL = "https://api.npoint.io/4010da4ce3ed3931dde8";
-        let slideIndex = 0;
-        let slideInterval;
+    const PERMANENT_DB_URL = "https://api.npoint.io/4010da4ce3ed3931dde8";
+    let slideIndex = 0;
+    let slideInterval;
+    let autoRefreshInterval; // Variabel untuk menyimpan interval refresh data
 
-        function showPage(id) {
-            document.querySelectorAll('.page').forEach(p => p.style.display = 'none');
-            const target = document.getElementById('page-' + id);
-            if(target) target.style.display = 'block';
-            window.scrollTo(0,0);
-        }
+    function showPage(id) {
+        document.querySelectorAll('.page').forEach(p => p.style.display = 'none');
+        const target = document.getElementById('page-' + id);
+        if(target) target.style.display = 'block';
+        window.scrollTo(0,0);
+    }
 
-        async function syncDatabase() {
-            try {
-                document.getElementById('live-announcement').innerText = "Memperbarui data...";
-                const response = await fetch(PERMANENT_DB_URL + '?nocache=' + new Date().getTime());
-                const data = await response.json();
+    async function syncDatabase() {
+        try {
+            // Kita hapus teks "Memperbarui data..." agar tidak mengganggu user setiap 5 detik
+            const response = await fetch(PERMANENT_DB_URL + '?nocache=' + new Date().getTime());
+            if (!response.ok) throw new Error("Network response was not ok");
+            const data = await response.json();
 
-                // 1. Slider
-                if(data.slider) {
-                    const slider = document.getElementById('imageSlider');
-                    const dots = document.getElementById('sliderDots');
-                    slider.innerHTML = data.slider.map(img => `<img src="${img}">`).join('');
-                    dots.innerHTML = data.slider.map((_, i) => `<div class="dot ${i===0?'active':''}"></div>`).join('');
-                    
-                    // Reset interval agar tidak numpuk
-                    clearInterval(slideInterval);
-                    startAutoSlide(data.slider.length);
-                }
+            // 1. Slider (Hanya update jika jumlah gambar berubah agar tidak flicker)
+            const slider = document.getElementById('imageSlider');
+            if(data.slider && slider.children.length !== data.slider.length) {
+                const dots = document.getElementById('sliderDots');
+                slider.innerHTML = data.slider.map(img => `<img src="${img}">`).join('');
+                dots.innerHTML = data.slider.map((_, i) => `<div class="dot ${i===0?'active':''}"></div>`).join('');
+                
+                clearInterval(slideInterval);
+                startAutoSlide(data.slider.length);
+            }
 
-                // 2. Data Utama
-                if(data.zoom_url) document.getElementById('zoom-link').href = data.zoom_url;
-                document.getElementById('live-announcement').innerText = data.pengumuman;
-                document.getElementById('live-countdown').innerText = data.hari_lagi + " Hari Lagi";
-                document.getElementById('live-date').innerText = data.tanggal_mulai;
+            // 2. Data Utama
+            if(data.zoom_url) document.getElementById('zoom-link').href = data.zoom_url;
+            document.getElementById('live-announcement').innerText = data.pengumuman;
+            document.getElementById('live-countdown').innerText = data.hari_lagi + " Hari Lagi";
+            document.getElementById('live-date').innerText = data.tanggal_mulai;
 
-                // 3. Mapping Lists
-                if(data.jadwal) document.getElementById('list-jadwal').innerHTML = data.jadwal.map(j => `<div class="list-item"><div><b style="color:var(--bg-blue)">${j.matkul}</b><br><small>🕒 ${j.jam}</small><br><small>👤 ${j.dosen || '-'}</small></div></div>`).join('');
-                if(data.tugas) document.getElementById('list-quest').innerHTML = data.tugas.map(t => `<div class="list-item"><div><b>${t.judul}</b><br><small>${t.deskripsi}</small></div>${t.link ? `<a href="${t.link}" class="btn-link" target="_blank">LIHAT</a>` : ''}</div>`).join('');
-                if(data.event) document.getElementById('list-event').innerHTML = data.event.map(e => `<div class="list-item"><div><b>${e.nama}</b><br><small>${e.tanggal}</small></div>${e.link ? `<a href="${e.link}" class="btn-link" target="_blank">LIHAT</a>` : ''}</div>`).join('');
-                if(data.kelompok) document.getElementById('list-kelompok').innerHTML = data.kelompok.map(k => `<div class="list-item"><div><b>${k.nama}</b><br><small>${k.tugas}</small></div><a href="${k.spreadsheet}" class="btn-link" target="_blank">DETAIL</a></div>`).join('');
-                if(data.nim) document.getElementById('table-nim').innerHTML = data.nim.map(n => `<tr><td>${n.id}</td><td>${n.nama}</td></tr>`).join('');
+            // 3. Mapping Lists (Update konten secara halus)
+            if(data.jadwal) document.getElementById('list-jadwal').innerHTML = data.jadwal.map(j => `<div class="list-item"><div><b style="color:var(--bg-blue)">${j.matkul}</b><br><small>🕒 ${j.jam}</small><br><small>👤 ${j.dosen || '-'}</small></div></div>`).join('');
+            if(data.tugas) document.getElementById('list-quest').innerHTML = data.tugas.map(t => `<div class="list-item"><div><b>${t.judul}</b><br><small>${t.deskripsi}</small></div>${t.link ? `<a href="${t.link}" class="btn-link" target="_blank">LIHAT</a>` : ''}</div>`).join('');
+            if(data.event) document.getElementById('list-event').innerHTML = data.event.map(e => `<div class="list-item"><div><b>${e.nama}</b><br><small>${e.tanggal}</small></div>${e.link ? `<a href="${e.link}" class="btn-link" target="_blank">LIHAT</a>` : ''}</div>`).join('');
+            if(data.kelompok) document.getElementById('list-kelompok').innerHTML = data.kelompok.map(k => `<div class="list-item"><div><b>${k.nama}</b><br><small>${k.tugas}</small></div><a href="${k.spreadsheet}" class="btn-link" target="_blank">DETAIL</a></div>`).join('');
+            if(data.nim) document.getElementById('table-nim').innerHTML = data.nim.map(n => `<tr><td>${n.id}</td><td>${n.nama}</td></tr>`).join('');
 
-            } catch (e) {
+            console.log("Data auto-synced at: " + new Date().toLocaleTimeString());
+
+        } catch (e) {
+            console.error("Sync error:", e);
+            // Hanya tampilkan pesan error jika data benar-benar kosong
+            if(document.getElementById('live-announcement').innerText === "Menghubungkan...") {
                 document.getElementById('live-announcement').innerText = "Gagal memuat data.";
             }
         }
+    }
 
-        function startAutoSlide(totalSlides) {
-            slideIndex = 0;
-            slideInterval = setInterval(() => {
-                slideIndex = (slideIndex + 1) % totalSlides;
-                const wrapper = document.getElementById('imageSlider');
-                const dots = document.querySelectorAll('.dot');
-                if(wrapper) wrapper.style.transform = `translateX(-${slideIndex * 100}%)`;
-                dots.forEach((dot, i) => dot.classList.toggle('active', i === slideIndex));
-            }, 5000);
-        }
+    function startAutoSlide(totalSlides) {
+        slideIndex = 0;
+        slideInterval = setInterval(() => {
+            slideIndex = (slideIndex + 1) % totalSlides;
+            const wrapper = document.getElementById('imageSlider');
+            const dots = document.querySelectorAll('.dot');
+            if(wrapper) wrapper.style.transform = `translateX(-${slideIndex * 100}%)`;
+            dots.forEach((dot, i) => dot.classList.toggle('active', i === slideIndex));
+        }, 5000);
+    }
 
-        function saveName() {
-            const n = document.getElementById('nameInput').value;
-            if(n) { localStorage.setItem('namaUser', n); location.reload(); }
+    function saveName() {
+        const n = document.getElementById('nameInput').value;
+        if(n) { 
+            localStorage.setItem('namaUser', n); 
+            init(); // Panggil init daripada reload total
         }
+    }
 
-        function logout() {
-            if(confirm("Keluar dan ganti nama?")) { localStorage.removeItem('namaUser'); location.reload(); }
+    function logout() {
+        if(confirm("Keluar dan ganti nama?")) { 
+            localStorage.removeItem('namaUser'); 
+            clearInterval(autoRefreshInterval); // Stop refresh saat logout
+            location.reload(); 
         }
+    }
 
-        function init() {
-            const user = localStorage.getItem('namaUser');
-            if(user) {
-                document.getElementById('userGreeting').innerText = "Halo " + user;
-                showPage('home');
-                syncDatabase();
-            } else {
-                document.getElementById('login-screen').style.display = 'flex';
-                document.getElementById('navbar').style.display = 'none';
-            }
+    function init() {
+        const user = localStorage.getItem('namaUser');
+        if(user) {
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('navbar').style.display = 'flex';
+            document.getElementById('userGreeting').innerText = "Halo " + user;
+            showPage('home');
+            
+            // Ambil data pertama kali
+            syncDatabase();
+
+            // Set interval untuk refresh data setiap 5 detik (5000 ms)
+            // Ini yang membuat data selalu "fresh" tanpa reload halaman
+            clearInterval(autoRefreshInterval); 
+            autoRefreshInterval = setInterval(syncDatabase, 5000);
+            
+        } else {
+            document.getElementById('login-screen').style.display = 'flex';
+            document.getElementById('navbar').style.display = 'none';
+            document.querySelectorAll('.page').forEach(p => p.style.display = 'none');
         }
-        init();
-    </script>
+    }
+    
+    init();
+</script>
 </body>
 </html>
