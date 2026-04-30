@@ -131,7 +131,7 @@
             btn.disabled = true;
             btn.innerText = "Mengirim...";
 
-            const pesan = `<b>📩 MATERI BARU MASUK</b>\n━━━━━━━━━━━━━━\n<b>📖 Matkul:</b> ${matkul}\n<b>👨‍🏫 Dosen:</b> ${dosen}\n<b>📅 Pekan:</b> ${pekan}\n<b>🔗 Link:</b> ${link}\n━━━━━━━━━━━━━━`;
+            const pesan = `<b>📩 INPUTAN MATKUL MASUK WAK</b>\n━━━━━━━━━━━━━━\n<b>📖 Matkul:</b> ${matkul}\n\n<b>👨‍🏫 Dosen:</b> ${dosen}\n\n<b>📅 Pekan:</b> ${pekan}\n\n<b>🔗 Link:</b> ${link}\n━━━━━━━━━━━━━━`;
 
             const url = `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(pesan)}&parse_mode=html`;
 
